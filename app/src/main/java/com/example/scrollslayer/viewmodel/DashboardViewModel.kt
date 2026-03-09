@@ -1,14 +1,15 @@
 package com.example.scrollslayer.viewmodel
 
 import androidx.lifecycle.ViewModel
+import com.example.scrollslayer.data.model.SocialUsage
 import com.example.scrollslayer.data.repository.GoalRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 data class DashboardUiState(
-    val socialTimeMinutes: Int = 0,
-    val goalName: String = "Sin meta definida"
+    val goalName: String = "Aprender francés",
+    val socialApps: List<SocialUsage> = emptyList(),
 )
 
 class DashboardViewModel : ViewModel() {
@@ -24,10 +25,12 @@ class DashboardViewModel : ViewModel() {
 
     fun loadDashboard() {
         val goal = goalRepository.getGoal()
+        val socialApps = goalRepository.getSocialUsage()
+
 
         _uiState.value = DashboardUiState(
-            socialTimeMinutes = 0,
-            goalName = goal?.name ?: "Sin meta definida"
+            goalName = goal?.name ?: "Sin meta definida",
+            socialApps = socialApps
         )
     }
 }
