@@ -13,23 +13,4 @@ class GoalRepository {
         )
     }
 
-    fun getSocialUsage(): List<SocialUsage> {
-        return listOf(
-            SocialUsage(
-                appName = "TikTok",
-                minutes = 22,
-                icon = "🎵"
-            ),
-            SocialUsage(
-                appName = "Instagram",
-                minutes = 15,
-                icon = "📸"
-            ),
-            SocialUsage(
-                appName = "YouTube",
-                minutes = 10,
-                icon = "▶️"
-            )
-        )
-    }
 }

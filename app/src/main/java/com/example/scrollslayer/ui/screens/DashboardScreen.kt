@@ -52,32 +52,22 @@ import com.example.scrollslayer.ui.theme.TextSecondary
 import com.example.scrollslayer.viewmodel.DashboardViewModel
 import com.example.scrollslayer.data.model.SocialUsage
 
-data class SocialUsageUi(
-    val appName: String,
-    val minutes: Int,
-    val icon: String
-)
-
 @Composable
 fun DashboardScreen(
     viewModel: DashboardViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    val socialApps = listOf(
-        SocialUsageUi("TikTok", 22, "🎵"),
-        SocialUsageUi("Instagram", 15, "📸"),
-        SocialUsageUi("YouTube", 10, "▶️")
-    )
 
-    val totalMinutes = socialApps.sumOf { it.minutes }
+
+    val totalMinutes = uiState.socialApps.sumOf { it.minutes }
 
     Scaffold(
         containerColor = BgColor
     ) { innerPadding ->
         DashboardContent(
             paddingValues = innerPadding,
-            socialApps = socialApps,
+            socialApps = uiState.socialApps,
             totalMinutes = totalMinutes,
             goalName = uiState.goalName,
             resourceTitle = "Podcast francés básico",
@@ -91,7 +81,7 @@ fun DashboardScreen(
 @Composable
 private fun DashboardContent(
     paddingValues: PaddingValues,
-    socialApps: List<SocialUsageUi>,
+    socialApps: List<SocialUsage>,
     totalMinutes: Int,
     goalName: String,
     resourceTitle: String,
@@ -217,7 +207,7 @@ private fun HeaderSection() {
 
 @Composable
 private fun EnemiesCard(
-    socialApps: List<SocialUsageUi>,
+    socialApps: List<SocialUsage>,
     totalMinutes: Int,
     dangerProgress: Float
 ) {
@@ -242,7 +232,7 @@ private fun EnemiesCard(
         Spacer(modifier = Modifier.height(16.dp))
 
         socialApps.forEachIndexed { index, app ->
-            SocialUsageRow(app = app)
+            SocialUsageRow(app = app )
 
             if (index != socialApps.lastIndex) {
                 Spacer(modifier = Modifier.height(10.dp))
@@ -273,7 +263,7 @@ private fun EnemiesCard(
 
 @Composable
 private fun SocialUsageRow(
-    app: SocialUsageUi
+    app: SocialUsage
 ) {
     Row(
         modifier = Modifier
