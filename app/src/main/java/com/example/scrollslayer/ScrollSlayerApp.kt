@@ -4,13 +4,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.scrollslayer.ui.screens.DashboardScreen
 import com.example.scrollslayer.viewmodel.DashboardViewModel
+import com.example.scrollslayer.viewmodel.DashboardViewModelFactory
 
 @Composable
 fun ScrollSlayerApp() {
-    val viewModel: DashboardViewModel = viewModel()
+
+    val context = LocalContext.current
+
+    val viewModel: DashboardViewModel = viewModel(
+        factory = DashboardViewModelFactory(context)
+    )
 
     Surface(
         modifier = Modifier.fillMaxSize()

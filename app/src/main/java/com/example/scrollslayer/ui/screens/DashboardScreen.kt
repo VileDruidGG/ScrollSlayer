@@ -51,6 +51,9 @@ import com.example.scrollslayer.ui.theme.TextPrimary
 import com.example.scrollslayer.ui.theme.TextSecondary
 import com.example.scrollslayer.viewmodel.DashboardViewModel
 import com.example.scrollslayer.data.model.SocialUsage
+import android.content.Intent
+import android.provider.Settings
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun DashboardScreen(
@@ -60,7 +63,7 @@ fun DashboardScreen(
 
 
 
-    val totalMinutes = uiState.socialApps.sumOf { it.minutes }
+
 
     Scaffold(
         containerColor = BgColor
@@ -68,7 +71,7 @@ fun DashboardScreen(
         DashboardContent(
             paddingValues = innerPadding,
             socialApps = uiState.socialApps,
-            totalMinutes = totalMinutes,
+            totalMinutes = uiState.totalMinutes,
             goalName = uiState.goalName,
             resourceTitle = "Podcast francés básico",
             savedResources = 3,
@@ -91,7 +94,7 @@ private fun DashboardContent(
 ) {
     val maxDangerMinutes = 180f
     val progress = (totalMinutes / maxDangerMinutes).coerceIn(0f, 1f)
-
+    val context = LocalContext.current
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -104,6 +107,16 @@ private fun DashboardContent(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         HeaderSection()
+
+        Button(
+            onClick = {
+                context.startActivity(
+                    Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+                )
+            }
+        ) {
+            Text("Permitir acceso a uso de apps")
+        }
 
         EnemiesCard(
             socialApps = socialApps,
