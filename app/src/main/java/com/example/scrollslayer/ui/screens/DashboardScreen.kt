@@ -53,7 +53,11 @@ import com.example.scrollslayer.viewmodel.DashboardViewModel
 import com.example.scrollslayer.data.model.SocialUsage
 import android.content.Intent
 import android.provider.Settings
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.scrollslayer.utils.UsagePermissionChecker
 
 @Composable
@@ -61,22 +65,42 @@ fun DashboardScreen(
     viewModel: DashboardViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
 
+    val lifecycleOwner = LocalLifecycleOwner.current
 
+    LaunchedEffect(Unit) {
+        viewModel.loadDashboard()
+    }
 
+    androidx.compose.runtime.DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.loadDashboard()
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     Scaffold(
         containerColor = BgColor
     ) { innerPadding ->
         DashboardContent(
             paddingValues = innerPadding,
+            hasUsagePermission = uiState.hasUsagePermission,
             socialApps = uiState.socialApps,
             totalMinutes = uiState.totalMinutes,
             goalName = uiState.goalName,
             resourceTitle = "Podcast francés básico",
             savedResources = 3,
             onRefresh = viewModel::loadDashboard,
+            onGrantPermission = { context.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))},
             onResumeMission = { /* TODO */ }
         )
     }
@@ -85,12 +109,14 @@ fun DashboardScreen(
 @Composable
 private fun DashboardContent(
     paddingValues: PaddingValues,
+    hasUsagePermission: Boolean,
     socialApps: List<SocialUsage>,
     totalMinutes: Int,
     goalName: String,
     resourceTitle: String,
     savedResources: Int,
     onRefresh: () -> Unit,
+    onGrantPermission: () -> Unit,
     onResumeMission: () -> Unit
 ) {
     val maxDangerMinutes = 180f
@@ -110,25 +136,17 @@ private fun DashboardContent(
     ) {
         HeaderSection()
 
-        if (!hasPermission) {
-
-            Button(
-                onClick = {
-                    context.startActivity(
-                        Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
-                    )
-                }
-            ) {
-                Text("Permitir acceso a uso de apps")
-            }
-
+        if (!hasUsagePermission) {
+            PermissionCard(
+                onGrantPermission = onGrantPermission
+            )
+        } else {
+            EnemiesCard(
+                socialApps = socialApps,
+                totalMinutes = totalMinutes,
+                dangerProgress = progress
+            )
         }
-
-        EnemiesCard(
-            socialApps = socialApps,
-            totalMinutes = totalMinutes,
-            dangerProgress = progress
-        )
 
         MissionActionCard(
             goalName = goalName,
@@ -280,6 +298,42 @@ private fun EnemiesCard(
     }
 }
 
+@Composable
+private fun PermissionCard(
+    onGrantPermission: () -> Unit
+) {
+    FantasyCard(
+        title = "Permiso requerido",
+        titleColor = Danger
+    ) {
+        Text(
+            text = "ScrollSlayer necesita acceso al uso de apps para detectar cuánto tiempo pasas en redes sociales.",
+            color = TextPrimary,
+            style = MaterialTheme.typography.bodyMedium
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Actívalo en la configuración del sistema para empezar a rastrear a los enemigos del día.",
+            color = TextSecondary,
+            style = MaterialTheme.typography.bodyMedium
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = onGrantPermission,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Danger,
+                contentColor = Color.White
+            ),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Text(text = "Conceder acceso")
+        }
+    }
+}
 @Composable
 private fun SocialUsageRow(
     app: SocialUsage

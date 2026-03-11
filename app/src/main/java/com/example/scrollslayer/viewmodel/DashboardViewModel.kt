@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import com.example.scrollslayer.data.model.SocialUsage
 import com.example.scrollslayer.data.repository.GoalRepository
 import com.example.scrollslayer.data.repository.UsageRepository
+import com.example.scrollslayer.utils.UsagePermissionChecker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,7 +15,8 @@ import kotlinx.coroutines.flow.asStateFlow
 data class DashboardUiState(
     val goalName: String = "Aprender francés",
     val socialApps: List<SocialUsage> = emptyList(),
-    val totalMinutes: Int = 0
+    val totalMinutes: Int = 0,
+    val hasUsagePermission: Boolean = false
 )
 
 class DashboardViewModel(
@@ -32,15 +34,23 @@ class DashboardViewModel(
     }
 
     fun loadDashboard() {
+        val app = getApplication<Application>()
+        val hasPermission = UsagePermissionChecker.hasUsageStatsPermission(app)
         val goal = goalRepository.getGoal()
-        val socialApps = usageRepository.getSocialUsage()
-        val totalMinutes = socialApps.sumOf { it.minutes }
 
+        val socialApps = if (hasPermission) {
+            usageRepository.getSocialUsage()
+        } else {
+            emptyList()
+        }
+
+        val totalMinutes = socialApps.sumOf { it.minutes }
 
         _uiState.value = DashboardUiState(
             goalName = goal?.name ?: "Sin meta definida",
             socialApps = socialApps,
-            totalMinutes = totalMinutes
+            totalMinutes = totalMinutes,
+            hasUsagePermission = hasPermission
         )
     }
 }
