@@ -1,6 +1,8 @@
 package com.example.scrollslayer.viewmodel
 
+import android.app.Application
 import android.content.Context
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import com.example.scrollslayer.data.model.SocialUsage
 import com.example.scrollslayer.data.repository.GoalRepository
@@ -16,11 +18,11 @@ data class DashboardUiState(
 )
 
 class DashboardViewModel(
-    private val context: Context
-) : ViewModel() {
+    application: Application
+) : AndroidViewModel(application){
 
     private val goalRepository = GoalRepository()
-    private val usageRepository = UsageRepository(context)
+    private val usageRepository = UsageRepository(application)
 
     private val _uiState = MutableStateFlow(DashboardUiState())
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
