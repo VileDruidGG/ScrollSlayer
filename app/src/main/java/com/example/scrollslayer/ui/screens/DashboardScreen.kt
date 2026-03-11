@@ -54,6 +54,7 @@ import com.example.scrollslayer.data.model.SocialUsage
 import android.content.Intent
 import android.provider.Settings
 import androidx.compose.ui.platform.LocalContext
+import com.example.scrollslayer.utils.UsagePermissionChecker
 
 @Composable
 fun DashboardScreen(
@@ -95,6 +96,7 @@ private fun DashboardContent(
     val maxDangerMinutes = 180f
     val progress = (totalMinutes / maxDangerMinutes).coerceIn(0f, 1f)
     val context = LocalContext.current
+    val hasPermission = UsagePermissionChecker.hasUsageStatsPermission(context)
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -108,14 +110,18 @@ private fun DashboardContent(
     ) {
         HeaderSection()
 
-        Button(
-            onClick = {
-                context.startActivity(
-                    Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
-                )
+        if (!hasPermission) {
+
+            Button(
+                onClick = {
+                    context.startActivity(
+                        Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+                    )
+                }
+            ) {
+                Text("Permitir acceso a uso de apps")
             }
-        ) {
-            Text("Permitir acceso a uso de apps")
+
         }
 
         EnemiesCard(
