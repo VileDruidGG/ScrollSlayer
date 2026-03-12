@@ -1,7 +1,6 @@
 package com.example.scrollslayer.data.repository
 
 import com.example.scrollslayer.data.model.Goal
-import com.example.scrollslayer.data.model.SocialUsage
 
 class GoalRepository {
 

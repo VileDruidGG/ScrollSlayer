@@ -1,9 +1,7 @@
 package com.example.scrollslayer.viewmodel
 
 import android.app.Application
-import android.content.Context
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import com.example.scrollslayer.data.model.SocialUsage
 import com.example.scrollslayer.data.repository.GoalRepository
 import com.example.scrollslayer.data.repository.UsageRepository

@@ -3,18 +3,12 @@ package com.example.scrollslayer.data.repository
 import android.app.usage.UsageStatsManager
 import android.content.Context
 import com.example.scrollslayer.data.model.SocialUsage
+import com.example.scrollslayer.utils.SocialAppsDetector
 import java.util.Calendar
 class UsageRepository(
     private val context: Context
 ) {
 
-    private val socialApps = mapOf(
-        "com.zhiliaoapp.musically" to "TikTok",
-        "com.instagram.android" to "Instagram",
-        "com.google.android.youtube" to "YouTube",
-        "com.twitter.android" to "Twitter",
-        "com.facebook.katana" to "Facebook"
-    )
     fun getSocialUsage(): List<SocialUsage> {
 
         val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
@@ -26,6 +20,7 @@ class UsageRepository(
         calendar.set(Calendar.HOUR_OF_DAY, 0)
         calendar.set(Calendar.MINUTE, 0)
         calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
 
         val startTime = calendar.timeInMillis
 
@@ -35,25 +30,23 @@ class UsageRepository(
             endTime
         )
 
-        val result = mutableListOf<SocialUsage>()
+        if (stats.isNullOrEmpty()) return emptyList()
 
-        stats?.forEach { usage ->
-            val packageName = usage.packageName
 
-            if (socialApps.containsKey(packageName)) {
-                val minutes = (usage.totalTimeInForeground / 1000 / 60).toInt()
+        return stats.mapNotNull { usage ->
+            val socialApp = SocialAppsDetector.getSocialApp(usage.packageName)
+                ?: return@mapNotNull null
 
-                if (minutes > 0) {
-                    result.add(
-                        SocialUsage(
-                            appName = socialApps[packageName]!!,
-                            minutes = minutes,
-                            icon = "📱"
-                        )
-                    )
-                }
-            }
-        }
-        return result
+            val minutes = (usage.totalTimeInForeground / 1000 / 60).toInt()
+
+            if (minutes <= 0) return@mapNotNull null
+
+            SocialUsage(
+                packageName = socialApp.packageName,
+                appName = socialApp.displayName,
+                minutes = minutes,
+                icon = socialApp.icon
+            )
+        }.sortedByDescending { it.minutes }
     }
 }

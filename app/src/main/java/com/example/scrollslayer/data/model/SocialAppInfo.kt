@@ -1,8 +1,7 @@
 package com.example.scrollslayer.data.model
 
-data class SocialUsage(
+data class SocialAppInfo(
     val packageName: String,
-    val appName: String,
-    val minutes: Int,
+    val displayName: String,
     val icon: String
 )
