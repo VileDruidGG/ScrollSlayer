@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.scrollslayer.ui.screens.DashboardScreen
+import com.example.scrollslayer.ui.screens.MissionsScreen
 import com.example.scrollslayer.viewmodel.DashboardViewModel
 
 @Composable
@@ -16,6 +17,7 @@ fun ScrollSlayerApp() {
     Surface(
         modifier = Modifier.fillMaxSize()
     ) {
-        DashboardScreen(viewModel = viewModel)
+        //DashboardScreen(viewModel = viewModel)
+        MissionsScreen()
     }
 }
