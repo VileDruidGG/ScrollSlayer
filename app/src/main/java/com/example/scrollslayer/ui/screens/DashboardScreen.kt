@@ -62,7 +62,8 @@ import com.example.scrollslayer.utils.UsagePermissionChecker
 
 @Composable
 fun DashboardScreen(
-    viewModel: DashboardViewModel
+    viewModel: DashboardViewModel,
+    onOpenMissions: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -101,7 +102,8 @@ fun DashboardScreen(
             savedResources = 3,
             onRefresh = viewModel::loadDashboard,
             onGrantPermission = { context.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))},
-            onResumeMission = { /* TODO */ }
+            onResumeMission = { /* TODO */ },
+            onOpenMissions = onOpenMissions
         )
     }
 }
@@ -117,7 +119,8 @@ private fun DashboardContent(
     savedResources: Int,
     onRefresh: () -> Unit,
     onGrantPermission: () -> Unit,
-    onResumeMission: () -> Unit
+    onResumeMission: () -> Unit,
+    onOpenMissions: () -> Unit
 ) {
     val maxDangerMinutes = 180f
     val progress = (totalMinutes / maxDangerMinutes).coerceIn(0f, 1f)
@@ -151,7 +154,8 @@ private fun DashboardContent(
         MissionActionCard(
             goalName = goalName,
             resourceTitle = resourceTitle,
-            onResumeMission = onResumeMission
+            onResumeMission = onResumeMission,
+            onOpenMissions = onOpenMissions
         )
 
         StatsSection(
@@ -385,7 +389,8 @@ private fun SocialUsageRow(
 private fun MissionActionCard(
     goalName: String,
     resourceTitle: String,
-    onResumeMission: () -> Unit
+    onResumeMission: () -> Unit,
+    onOpenMissions: () -> Unit
 ) {
     FantasyCard(
         title = "Misión activa",
@@ -460,16 +465,29 @@ private fun MissionActionCard(
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = onResumeMission,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = AccentBlue,
-                contentColor = Color.White
-            ),
-            shape = RoundedCornerShape(16.dp)
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(text = "Retomar misión")
+
+            Button(
+                onClick = onResumeMission,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = AccentBlue,
+                    contentColor = Color.White
+                ),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Text(text = "Retomar misión")
+            }
+            Button(
+                onClick = onOpenMissions,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = AccentBlue,
+                    contentColor = Color.White
+                ),
+                shape = RoundedCornerShape(16.dp)) {
+                Text("Ver misiones")
+            }
         }
     }
 }

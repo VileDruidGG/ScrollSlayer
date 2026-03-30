@@ -51,6 +51,8 @@ import com.example.scrollslayer.viewmodel.MissionViewModel
 
 @Composable
 fun MissionsScreen(
+    onBack: () -> Unit,
+    onMissionSelected: (MissionEntity) -> Unit,
     viewModel: MissionViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -64,7 +66,9 @@ fun MissionsScreen(
             activeMission = uiState.activeMission,
             onCreateMission = viewModel::createMission,
             onSetActiveMission = viewModel::setActiveMission,
-            onDeleteMission = viewModel::deleteMission
+            onDeleteMission = viewModel::deleteMission,
+            onMissionSelected = onMissionSelected,
+            onBack = onBack
         )
     }
 }
@@ -76,7 +80,9 @@ private fun MissionsContent(
     activeMission: MissionEntity?,
     onCreateMission: (String, String, Boolean) -> Unit,
     onSetActiveMission: (MissionEntity) -> Unit,
-    onDeleteMission: (Long) -> Unit
+    onDeleteMission: (Long) -> Unit,
+    onMissionSelected: (MissionEntity) -> Unit,
+    onBack: () -> Unit
 ) {
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
@@ -92,6 +98,9 @@ private fun MissionsContent(
             .padding(horizontal = 20.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        TextButton(onClick = onBack) {
+            Text("← Volver")
+        }
         HeaderSection(activeMission = activeMission)
 
         CreateMissionCard(
@@ -127,7 +136,8 @@ private fun MissionsContent(
                     MissionCard(
                         mission = mission,
                         onSetActive = { onSetActiveMission(mission) },
-                        onDelete = { onDeleteMission(mission.id) }
+                        onDelete = { onDeleteMission(mission.id) },
+                        onClick = { onMissionSelected(mission) }
                     )
                 }
             }
@@ -255,9 +265,11 @@ private fun CreateMissionCard(
 private fun MissionCard(
     mission: MissionEntity,
     onSetActive: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onClick: () -> Unit
 ) {
     Card(
+        onClick = onClick,
         colors = CardDefaults.cardColors(
             containerColor = PanelColor
         ),

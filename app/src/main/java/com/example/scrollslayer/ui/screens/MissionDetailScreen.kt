@@ -50,6 +50,7 @@ import com.example.scrollslayer.viewmodel.ResourceViewModel
 @Composable
 fun MissionDetailScreen(
     mission: MissionEntity,
+    onBack: () -> Unit,
     viewModel: ResourceViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -78,7 +79,8 @@ fun MissionDetailScreen(
                     missionId = mission.id,
                     resourceId = resourceId
                 )
-            }
+            },
+            onBack = onBack
         )
     }
 }
@@ -89,7 +91,8 @@ private fun MissionDetailContent(
     mission: MissionEntity,
     resources: List<ResourceEntity>,
     onAddResource: (String, String, String) -> Unit,
-    onDeleteResource: (Long) -> Unit
+    onDeleteResource: (Long) -> Unit,
+    onBack: () -> Unit
 ) {
     var title by remember { mutableStateOf("") }
     var url by remember { mutableStateOf("") }
@@ -105,6 +108,9 @@ private fun MissionDetailContent(
             .padding(horizontal = 20.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        TextButton(onClick = onBack) {
+            Text("← Volver")
+        }
         MissionHeader(mission = mission)
 
         AddResourceCard(
