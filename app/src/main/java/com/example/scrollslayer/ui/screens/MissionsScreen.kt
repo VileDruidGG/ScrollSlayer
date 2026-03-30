@@ -1,6 +1,7 @@
 package com.example.scrollslayer.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,10 +16,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.border
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -87,6 +86,7 @@ private fun MissionsContent(
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var createAsActive by remember { mutableStateOf(false) }
+    val listState = rememberLazyListState()
 
     Column(
         modifier = Modifier
@@ -101,37 +101,27 @@ private fun MissionsContent(
         TextButton(onClick = onBack) {
             Text("← Volver")
         }
+
         HeaderSection(activeMission = activeMission)
 
-        CreateMissionCard(
-            title = title,
-            description = description,
-            createAsActive = createAsActive,
-            onTitleChange = { title = it },
-            onDescriptionChange = { description = it },
-            onCreateAsActiveChange = { createAsActive = it },
-            onSaveClick = {
-                if (title.isNotBlank() && description.isNotBlank()) {
-                    onCreateMission(title.trim(), description.trim(), createAsActive)
-                    title = ""
-                    description = ""
-                    createAsActive = false
-                }
+        LazyColumn(
+            state = listState,
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            item {
+                Text(
+                    text = "Tus misiones",
+                    color = Gold,
+                    style = MaterialTheme.typography.titleLarge
+                )
             }
-        )
 
-        Text(
-            text = "Tus misiones",
-            color = Gold,
-            style = MaterialTheme.typography.titleLarge
-        )
-
-        if (missions.isEmpty()) {
-            EmptyMissionsState()
-        } else {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
+            if (missions.isEmpty()) {
+                item {
+                    EmptyMissionsState()
+                }
+            } else {
                 items(missions, key = { it.id }) { mission ->
                     MissionCard(
                         mission = mission,
@@ -140,6 +130,33 @@ private fun MissionsContent(
                         onClick = { onMissionSelected(mission) }
                     )
                 }
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            item {
+                CreateMissionCard(
+                    title = title,
+                    description = description,
+                    createAsActive = createAsActive,
+                    onTitleChange = { title = it },
+                    onDescriptionChange = { description = it },
+                    onCreateAsActiveChange = { createAsActive = it },
+                    onSaveClick = {
+                        if (title.isNotBlank() && description.isNotBlank()) {
+                            onCreateMission(title.trim(), description.trim(), createAsActive)
+                            title = ""
+                            description = ""
+                            createAsActive = false
+                        }
+                    }
+                )
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(12.dp))
             }
         }
     }

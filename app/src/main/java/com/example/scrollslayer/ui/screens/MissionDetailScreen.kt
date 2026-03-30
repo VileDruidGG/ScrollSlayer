@@ -13,9 +13,9 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -97,6 +97,7 @@ private fun MissionDetailContent(
     var title by remember { mutableStateOf("") }
     var url by remember { mutableStateOf("") }
     var type by remember { mutableStateOf("") }
+    val listState = rememberLazyListState()
 
     Column(
         modifier = Modifier
@@ -111,48 +112,64 @@ private fun MissionDetailContent(
         TextButton(onClick = onBack) {
             Text("← Volver")
         }
+
         MissionHeader(mission = mission)
 
-        AddResourceCard(
-            title = title,
-            url = url,
-            type = type,
-            onTitleChange = { title = it },
-            onUrlChange = { url = it },
-            onTypeChange = { type = it },
-            onSaveClick = {
-                if (title.isNotBlank() && url.isNotBlank() && type.isNotBlank()) {
-                    onAddResource(
-                        title.trim(),
-                        url.trim(),
-                        type.trim()
-                    )
-                    title = ""
-                    url = ""
-                    type = ""
-                }
+        LazyColumn(
+            state = listState,
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            item {
+                Text(
+                    text = "Recursos de la misión",
+                    color = Gold,
+                    style = MaterialTheme.typography.titleLarge
+                )
             }
-        )
 
-        Text(
-            text = "Recursos de la misión",
-            color = Gold,
-            style = MaterialTheme.typography.titleLarge
-        )
-
-        if (resources.isEmpty()) {
-            EmptyResourcesState()
-        } else {
-            LazyColumn(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
+            if (resources.isEmpty()) {
+                item {
+                    EmptyResourcesState()
+                }
+            } else {
                 items(resources, key = { it.id }) { resource ->
                     ResourceCard(
                         resource = resource,
                         onDelete = { onDeleteResource(resource.id) }
                     )
                 }
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            item {
+                AddResourceCard(
+                    title = title,
+                    url = url,
+                    type = type,
+                    onTitleChange = { title = it },
+                    onUrlChange = { url = it },
+                    onTypeChange = { type = it },
+                    onSaveClick = {
+                        if (title.isNotBlank() && url.isNotBlank() && type.isNotBlank()) {
+                            onAddResource(
+                                title.trim(),
+                                url.trim(),
+                                type.trim()
+                            )
+                            title = ""
+                            url = ""
+                            type = ""
+                        }
+                    }
+                )
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(12.dp))
             }
         }
     }
