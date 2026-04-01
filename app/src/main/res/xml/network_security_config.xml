@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Allow cleartext (HTTP) ONLY for the Android emulator loopback -->
+    <!-- This lets the app talk to your local backend at http://10.0.2.2:8080 -->
+    <!-- Remove this in production and use HTTPS instead -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">10.0.2.2</domain>
+    </domain-config>
+</network-security-config>
