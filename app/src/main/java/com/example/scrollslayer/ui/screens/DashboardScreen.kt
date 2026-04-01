@@ -63,7 +63,8 @@ import com.example.scrollslayer.utils.UsagePermissionChecker
 @Composable
 fun DashboardScreen(
     viewModel: DashboardViewModel,
-    onOpenMissions: () -> Unit
+    onOpenMissions: () -> Unit,
+    onOpenLearnPath: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -103,7 +104,8 @@ fun DashboardScreen(
             onRefresh = viewModel::loadDashboard,
             onGrantPermission = { context.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))},
             onResumeMission = { /* TODO */ },
-            onOpenMissions = onOpenMissions
+            onOpenMissions = onOpenMissions,
+            onOpenLearnPath = onOpenLearnPath
         )
     }
 }
@@ -120,7 +122,8 @@ private fun DashboardContent(
     onRefresh: () -> Unit,
     onGrantPermission: () -> Unit,
     onResumeMission: () -> Unit,
-    onOpenMissions: () -> Unit
+    onOpenMissions: () -> Unit,
+    onOpenLearnPath: () -> Unit
 ) {
     val maxDangerMinutes = 180f
     val progress = (totalMinutes / maxDangerMinutes).coerceIn(0f, 1f)
@@ -158,6 +161,9 @@ private fun DashboardContent(
             onOpenMissions = onOpenMissions
         )
 
+        // LearnPath card
+        LearnPathCard(onOpenLearnPath = onOpenLearnPath)
+
         StatsSection(
             savedResources = savedResources,
             recoverableMinutes = totalMinutes,
@@ -177,6 +183,62 @@ private fun DashboardContent(
         }
 
         Spacer(modifier = Modifier.height(12.dp))
+    }
+}
+
+@Composable
+private fun LearnPathCard(onOpenLearnPath: () -> Unit) {
+    FantasyCard(
+        title = "LearnPath",
+        titleColor = AccentBlue
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(AccentBlue.copy(alpha = 0.18f))
+                    .border(
+                        width = 1.dp,
+                        color = AccentBlue.copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(14.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = "\uD83E\uDDE0")
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Column {
+                Text(
+                    text = "Recursos con IA",
+                    color = TextPrimary,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = "Escribe tu meta y la IA encontrará videos, cursos, podcasts y más.",
+                    color = TextSecondary,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = onOpenLearnPath,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = AccentBlue,
+                contentColor = Color.White
+            ),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Text(text = "Buscar recursos")
+        }
     }
 }
 
