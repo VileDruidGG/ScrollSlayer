@@ -14,11 +14,25 @@ import java.util.concurrent.TimeUnit
  *
  * Call RetrofitClient.initialize(context) once from your Activity
  * before using the api property.
+ *
+ * BASE_URL setup:
+ *   - Emulator  → "http://10.0.2.2:8080/"   (alias for host machine localhost)
+ *   - Physical  → "http://<PC_LOCAL_IP>:8080/" (e.g. "http://192.168.20.42:8080/")
+ *   - Production → "https://your-domain.com/"
+ *
+ * To find your PC's local IP:
+ *   Windows:  ipconfig → look for IPv4 under Wi-Fi
+ *   Mac/Linux: ifconfig | grep "inet " or ip addr
+ *
+ * IMPORTANT: Your phone and PC must be on the SAME Wi-Fi network,
+ * and the backend must listen on 0.0.0.0 (not just 127.0.0.1).
  */
 object RetrofitClient {
 
-    // Change to your backend URL in production
-    private const val BASE_URL = "http://10.0.2.2:8080/"
+    // ★ CHANGE THIS to your PC's local IP when testing on a physical device
+    // Example: "http://192.168.20.42:8080/"
+    // Use "http://10.0.2.2:8080/" for emulator only
+    private const val BASE_URL = "http://192.168.20.211:8080/"
 
     private var deviceId: String = UUID.randomUUID().toString()
     private var _api: LearnPathApi? = null
