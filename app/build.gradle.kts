@@ -62,4 +62,17 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
+
+    // LearnPath — Networking
+    implementation(libs.retrofit.core)
+    implementation(libs.retrofit.converter.gson)
+    implementation(libs.okhttp.core)
+    implementation(libs.okhttp.logging)
+    implementation(libs.gson)
+
+    // LearnPath — Security (encrypted key storage)
+    implementation(libs.androidx.security.crypto)
+
+    // LearnPath — Coroutines
+    implementation(libs.kotlinx.coroutines.android)
 }

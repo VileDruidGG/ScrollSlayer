@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.scrollslayer.data.local.entity.MissionEntity
 import com.example.scrollslayer.ui.screens.DashboardScreen
+import com.example.scrollslayer.ui.screens.LearnPathScreen
 import com.example.scrollslayer.ui.screens.MissionDetailScreen
 import com.example.scrollslayer.ui.screens.MissionsScreen
 import com.example.scrollslayer.viewmodel.DashboardViewModel
@@ -15,6 +16,7 @@ sealed class AppScreen {
     data object Dashboard : AppScreen()
     data object Missions : AppScreen()
     data class MissionDetail(val mission: MissionEntity) : AppScreen()
+    data object LearnPath : AppScreen()
 }
 
 @Composable
@@ -34,6 +36,9 @@ fun ScrollSlayerApp() {
                     viewModel = dashboardViewModel,
                     onOpenMissions = {
                         currentScreen = AppScreen.Missions
+                    },
+                    onOpenLearnPath = {
+                        currentScreen = AppScreen.LearnPath
                     }
                 )
             }
@@ -54,6 +59,14 @@ fun ScrollSlayerApp() {
                     mission = screen.mission,
                     onBack = {
                         currentScreen = AppScreen.Missions
+                    }
+                )
+            }
+
+            AppScreen.LearnPath -> {
+                LearnPathScreen(
+                    onBack = {
+                        currentScreen = AppScreen.Dashboard
                     }
                 )
             }
