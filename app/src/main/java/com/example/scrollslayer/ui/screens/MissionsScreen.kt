@@ -13,7 +13,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -25,7 +24,6 @@ import com.example.scrollslayer.viewmodel.MissionViewModel
 
 @Composable
 fun MissionsScreen(
-    onBack: () -> Unit,
     onMissionSelected: (MissionEntity) -> Unit,
     viewModel: MissionViewModel = viewModel()
 ) {
@@ -39,8 +37,7 @@ fun MissionsScreen(
             onCreateMission = viewModel::createMission,
             onSetActiveMission = viewModel::setActiveMission,
             onDeleteMission = viewModel::deleteMission,
-            onMissionSelected = onMissionSelected,
-            onBack = onBack
+            onMissionSelected = onMissionSelected
         )
     }
 }
@@ -53,8 +50,7 @@ private fun MissionsContent(
     onCreateMission: (String, String, Boolean) -> Unit,
     onSetActiveMission: (MissionEntity) -> Unit,
     onDeleteMission: (Long) -> Unit,
-    onMissionSelected: (MissionEntity) -> Unit,
-    onBack: () -> Unit
+    onMissionSelected: (MissionEntity) -> Unit
 ) {
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
@@ -72,16 +68,6 @@ private fun MissionsContent(
         verticalArrangement = Arrangement.spacedBy(12.dp),
         contentPadding = PaddingValues(horizontal = 18.dp, vertical = 16.dp)
     ) {
-        // Back nav
-        item {
-            TextButton(
-                onClick = onBack,
-                colors = ButtonDefaults.textButtonColors(contentColor = TextSecondary)
-            ) {
-                Text("← Misiones", fontSize = 13.sp)
-            }
-        }
-
         // Board header
         item { BoardHeader(activeMission = activeMission) }
 
@@ -119,15 +105,9 @@ private fun MissionsContent(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                HorizontalDivider(
-                    modifier = Modifier.weight(1f),
-                    color = GoldSoft.copy(alpha = 0.25f)
-                )
+                HorizontalDivider(modifier = Modifier.weight(1f), color = GoldSoft.copy(alpha = 0.25f))
                 Text(text = "✦", color = GoldSoft.copy(alpha = 0.5f), fontSize = 12.sp)
-                HorizontalDivider(
-                    modifier = Modifier.weight(1f),
-                    color = GoldSoft.copy(alpha = 0.25f)
-                )
+                HorizontalDivider(modifier = Modifier.weight(1f), color = GoldSoft.copy(alpha = 0.25f))
             }
         }
 
@@ -174,8 +154,6 @@ private fun BoardHeader(activeMission: MissionEntity?) {
             fontStyle = FontStyle.Italic,
             modifier = Modifier.padding(top = 2.dp, bottom = 12.dp)
         )
-
-        // Active mission banner
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -189,12 +167,7 @@ private fun BoardHeader(activeMission: MissionEntity?) {
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(text = "⚑", fontSize = 14.sp, color = Gold)
-                Text(
-                    text = "Misión activa: ",
-                    color = TextSecondary,
-                    fontSize = 13.sp,
-                    fontStyle = FontStyle.Italic
-                )
+                Text(text = "Misión activa: ", color = TextSecondary, fontSize = 13.sp, fontStyle = FontStyle.Italic)
                 Text(
                     text = activeMission?.title ?: "Ninguna",
                     color = Gold,
@@ -228,7 +201,6 @@ private fun MissionBoardCard(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            // Title + badge row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -254,7 +226,6 @@ private fun MissionBoardCard(
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
-            // Action buttons
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -263,16 +234,12 @@ private fun MissionBoardCard(
                     Button(
                         onClick = onSetActive,
                         shape = RoundedCornerShape(10.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Gold,
-                            contentColor = BgColor
-                        ),
+                        colors = ButtonDefaults.buttonColors(containerColor = Gold, contentColor = BgColor),
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                     ) {
                         Text("Activar", fontSize = 13.sp, fontWeight = FontWeight.Bold)
                     }
                 }
-
                 OutlinedButton(
                     onClick = onClick,
                     shape = RoundedCornerShape(10.dp),
@@ -282,9 +249,7 @@ private fun MissionBoardCard(
                 ) {
                     Text("Abrir", fontSize = 13.sp)
                 }
-
                 Spacer(modifier = Modifier.weight(1f))
-
                 TextButton(
                     onClick = onDelete,
                     colors = ButtonDefaults.textButtonColors(contentColor = Danger),
@@ -311,13 +276,7 @@ private fun MissionStatusBadge(isActive: Boolean) {
             .border(1.dp, border, RoundedCornerShape(20.dp))
             .padding(horizontal = 10.dp, vertical = 3.dp)
     ) {
-        Text(
-            text = label,
-            color = color,
-            fontSize = 9.sp,
-            fontWeight = FontWeight.Bold,
-            letterSpacing = 1.2.sp
-        )
+        Text(text = label, color = color, fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp)
     }
 }
 
@@ -339,12 +298,7 @@ private fun EmptyMissionsState() {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(text = "⚑", fontSize = 32.sp)
-            Text(
-                text = "Sin misiones todavía",
-                color = TextPrimary,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold
-            )
+            Text(text = "Sin misiones todavía", color = TextPrimary, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
             Text(
                 text = "Crea tu primera misión para empezar a redirigir tu tiempo hacia algo que importe.",
                 color = TextSecondary,
@@ -368,6 +322,16 @@ private fun CreateMissionCard(
     onCreateAsActiveChange: (Boolean) -> Unit,
     onSaveClick: () -> Unit
 ) {
+    val fieldColors = OutlinedTextFieldDefaults.colors(
+        focusedBorderColor = Gold.copy(alpha = 0.6f),
+        unfocusedBorderColor = GoldSoft.copy(alpha = 0.3f),
+        focusedLabelColor = Gold,
+        unfocusedLabelColor = TextSecondary,
+        focusedTextColor = TextPrimary,
+        unfocusedTextColor = TextPrimary,
+        cursorColor = Gold
+    )
+
     Card(
         colors = CardDefaults.cardColors(containerColor = PanelColor),
         shape = RoundedCornerShape(20.dp),
@@ -394,15 +358,7 @@ private fun CreateMissionCard(
                 label = { Text("Título de la misión", fontSize = 13.sp) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Gold.copy(alpha = 0.6f),
-                    unfocusedBorderColor = GoldSoft.copy(alpha = 0.3f),
-                    focusedLabelColor = Gold,
-                    unfocusedLabelColor = TextSecondary,
-                    focusedTextColor = TextPrimary,
-                    unfocusedTextColor = TextPrimary,
-                    cursorColor = Gold
-                )
+                colors = fieldColors
             )
 
             OutlinedTextField(
@@ -412,15 +368,7 @@ private fun CreateMissionCard(
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 2,
                 shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Gold.copy(alpha = 0.6f),
-                    unfocusedBorderColor = GoldSoft.copy(alpha = 0.3f),
-                    focusedLabelColor = Gold,
-                    unfocusedLabelColor = TextSecondary,
-                    focusedTextColor = TextPrimary,
-                    unfocusedTextColor = TextPrimary,
-                    cursorColor = Gold
-                )
+                colors = fieldColors
             )
 
             Row(
@@ -436,11 +384,7 @@ private fun CreateMissionCard(
                         checkmarkColor = BgColor
                     )
                 )
-                Text(
-                    text = "Marcar como misión activa",
-                    color = TextSecondary,
-                    fontSize = 13.sp
-                )
+                Text(text = "Marcar como misión activa", color = TextSecondary, fontSize = 13.sp)
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -448,10 +392,7 @@ private fun CreateMissionCard(
                     onClick = onSaveClick,
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Gold,
-                        contentColor = BgColor
-                    )
+                    colors = ButtonDefaults.buttonColors(containerColor = Gold, contentColor = BgColor)
                 ) {
                     Text("Guardar misión", fontWeight = FontWeight.Bold, fontSize = 13.sp)
                 }
