@@ -3,62 +3,30 @@ package com.example.scrollslayer.ui.screens
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import com.example.scrollslayer.ui.theme.AccentBlue
-import com.example.scrollslayer.ui.theme.BgColor
-import com.example.scrollslayer.ui.theme.Danger
-import com.example.scrollslayer.ui.theme.Gold
-import com.example.scrollslayer.ui.theme.GoldSoft
-import com.example.scrollslayer.ui.theme.PanelColor
-import com.example.scrollslayer.ui.theme.PanelSecondary
-import com.example.scrollslayer.ui.theme.Success
-import com.example.scrollslayer.ui.theme.TextPrimary
-import com.example.scrollslayer.ui.theme.TextSecondary
-import com.example.scrollslayer.viewmodel.DashboardViewModel
-import com.example.scrollslayer.data.model.SocialUsage
-import android.content.Intent
-import android.provider.Settings
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.example.scrollslayer.utils.UsagePermissionChecker
+import com.example.scrollslayer.data.model.SocialUsage
+import com.example.scrollslayer.ui.theme.*
+import com.example.scrollslayer.viewmodel.DashboardViewModel
+import android.content.Intent
+import android.provider.Settings
 
 @Composable
 fun DashboardScreen(
@@ -67,533 +35,531 @@ fun DashboardScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
-
-
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    LaunchedEffect(Unit) {
-        viewModel.loadDashboard()
-    }
+    LaunchedEffect(Unit) { viewModel.loadDashboard() }
 
-    androidx.compose.runtime.DisposableEffect(lifecycleOwner) {
+    DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                viewModel.loadDashboard()
-            }
+            if (event == Lifecycle.Event.ON_RESUME) viewModel.loadDashboard()
         }
-
         lifecycleOwner.lifecycle.addObserver(observer)
-
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    Scaffold(
-        containerColor = BgColor
-    ) { innerPadding ->
-        DashboardContent(
-            paddingValues = innerPadding,
-            hasUsagePermission = uiState.hasUsagePermission,
-            socialApps = uiState.socialApps,
-            totalMinutes = uiState.totalMinutes,
-            goalName = uiState.goalName,
-            resourceTitle = "Podcast francés básico",
-            savedResources = 3,
-            onRefresh = viewModel::loadDashboard,
-            onGrantPermission = { context.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))},
-            onResumeMission = { /* TODO */ },
-            onOpenMissions = onOpenMissions
-        )
-    }
-}
-
-@Composable
-private fun DashboardContent(
-    paddingValues: PaddingValues,
-    hasUsagePermission: Boolean,
-    socialApps: List<SocialUsage>,
-    totalMinutes: Int,
-    goalName: String,
-    resourceTitle: String,
-    savedResources: Int,
-    onRefresh: () -> Unit,
-    onGrantPermission: () -> Unit,
-    onResumeMission: () -> Unit,
-    onOpenMissions: () -> Unit
-) {
-    val maxDangerMinutes = 180f
-    val progress = (totalMinutes / maxDangerMinutes).coerceIn(0f, 1f)
-    val context = LocalContext.current
-    val hasPermission = UsagePermissionChecker.hasUsageStatsPermission(context)
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(BgColor)
-            .padding(paddingValues)
-            .statusBarsPadding()
-            .navigationBarsPadding()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        HeaderSection()
-
-        if (!hasUsagePermission) {
-            PermissionCard(
-                onGrantPermission = onGrantPermission
-            )
-        } else {
-            EnemiesCard(
-                socialApps = socialApps,
-                totalMinutes = totalMinutes,
-                dangerProgress = progress
-            )
-        }
-
-        MissionActionCard(
-            goalName = goalName,
-            resourceTitle = resourceTitle,
-            onResumeMission = onResumeMission,
-            onOpenMissions = onOpenMissions
-        )
-
-        StatsSection(
-            savedResources = savedResources,
-            recoverableMinutes = totalMinutes,
-            notificationsEnabled = true
-        )
-
-        Button(
-            onClick = onRefresh,
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Gold,
-                contentColor = BgColor
-            ),
-            shape = RoundedCornerShape(16.dp)
+    Scaffold(containerColor = BgColor) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(BgColor)
+                .padding(innerPadding)
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 18.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Text(text = "Actualizar tablero")
-        }
+            DashboardHeader()
 
-        Spacer(modifier = Modifier.height(12.dp))
+            if (!uiState.hasUsagePermission) {
+                PermissionCard(
+                    onGrantPermission = {
+                        context.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+                    }
+                )
+            } else {
+                EnemiesCard(
+                    socialApps = uiState.socialApps,
+                    totalMinutes = uiState.totalMinutes
+                )
+            }
+
+            MissionCard(
+                goalName = uiState.goalName,
+                onResumeMission = { /* TODO */ },
+                onOpenMissions = onOpenMissions
+            )
+
+            SuggestedResourceCard(
+                resourceTitle = "BBC French Listening",
+                resourceType = "Podcast",
+                resourceSource = "bbc.co.uk · 12 min"
+            )
+
+            CompanionCard()
+
+            Spacer(modifier = Modifier.height(8.dp))
+        }
     }
 }
 
+// ─── Header ───────────────────────────────────────────────────────────────────
+
 @Composable
-private fun HeaderSection() {
-    Surface(
-        color = PanelColor,
-        shape = RoundedCornerShape(24.dp),
+private fun DashboardHeader() {
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .border(
-                width = 1.dp,
-                color = GoldSoft,
-                shape = RoundedCornerShape(24.dp)
-            )
+            .padding(horizontal = 4.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Top
     ) {
-        Column(
-            modifier = Modifier.padding(20.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(52.dp)
-                        .clip(CircleShape)
-                        .background(Gold.copy(alpha = 0.15f))
-                        .border(1.dp, GoldSoft, CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "⚔️",
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                Column {
-                    Text(
-                        text = "ScrollSlayer",
-                        color = Gold,
-                        style = MaterialTheme.typography.headlineSmall
-                    )
-                    Text(
-                        text = "Recupera tu atención. Cumple tu misión.",
-                        color = TextSecondary,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
+        Column {
             Text(
-                text = "Buen día, aventurero.",
-                color = TextPrimary,
-                style = MaterialTheme.typography.titleMedium
+                text = "ScrollSlayer",
+                color = Gold,
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 0.5.sp
             )
-
             Text(
-                text = "Hoy tu enfoque se enfrenta a varios enemigos. Aún puedes recuperar el control.",
+                text = "\"Tu tiempo de hoy tiene consecuencias.\"",
                 color = TextSecondary,
-                style = MaterialTheme.typography.bodyMedium
+                fontSize = 13.sp,
+                fontStyle = FontStyle.Italic
             )
+        }
+
+        Box(
+            modifier = Modifier
+                .size(38.dp)
+                .clip(RoundedCornerShape(50))
+                .background(PanelColor)
+                .border(1.dp, GoldSoft.copy(alpha = 0.5f), RoundedCornerShape(50)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(text = "⚙", fontSize = 16.sp, color = Gold)
         }
     }
 }
+
+// ─── Enemies Card ─────────────────────────────────────────────────────────────
 
 @Composable
 private fun EnemiesCard(
     socialApps: List<SocialUsage>,
-    totalMinutes: Int,
-    dangerProgress: Float
+    totalMinutes: Int
 ) {
-    FantasyCard(
-        title = "Enemigos del día",
-        titleColor = Danger
-    ) {
+    DashboardCard {
         Text(
-            text = "$totalMinutes min consumidos en total",
-            color = TextPrimary,
-            style = MaterialTheme.typography.headlineSmall
+            text = "⚔  Actividad enemiga hoy",
+            color = Danger,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.SemiBold,
+            letterSpacing = 1.5.sp
         )
+        Text(
+            text = "Apps consumiendo tu atención ahora",
+            color = TextSecondary,
+            fontSize = 12.sp,
+            fontStyle = FontStyle.Italic,
+            modifier = Modifier.padding(top = 2.dp, bottom = 12.dp)
+        )
+
+        socialApps.forEachIndexed { index, app ->
+            EnemyRow(app = app)
+            if (index < socialApps.lastIndex) {
+                HorizontalDivider(color = GoldSoft.copy(alpha = 0.12f), thickness = 1.dp)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
+                .background(Danger.copy(alpha = 0.12f))
+                .border(1.dp, Danger.copy(alpha = 0.35f), RoundedCornerShape(12.dp))
+                .padding(horizontal = 14.dp, vertical = 11.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Exposición social total hoy",
+                    color = Danger,
+                    fontSize = 13.sp,
+                    fontStyle = FontStyle.Italic
+                )
+                Text(
+                    text = "$totalMinutes min",
+                    color = Danger,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            OutlinedButton(
+                onClick = { },
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(10.dp),
+                border = BorderStroke(1.dp, GoldSoft.copy(alpha = 0.5f)),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = TextSecondary)
+            ) {
+                Text("Ver uso detallado", fontSize = 13.sp)
+            }
+            Button(
+                onClick = { },
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Danger.copy(alpha = 0.35f),
+                    contentColor = Danger
+                )
+            ) {
+                Text("Restringir ahora", fontSize = 13.sp)
+            }
+        }
+    }
+}
+
+@Composable
+private fun EnemyRow(app: SocialUsage) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(Danger.copy(alpha = 0.12f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(text = app.icon, fontSize = 18.sp)
+        }
+
+        Text(
+            text = app.appName,
+            color = TextPrimary,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.weight(1f)
+        )
+
+        Text(
+            text = "${app.minutes} min",
+            color = Danger,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Medium
+        )
+
+        Box(
+            modifier = Modifier
+                .size(7.dp)
+                .clip(RoundedCornerShape(50))
+                .background(Danger)
+        )
+    }
+}
+
+// ─── Mission Card ─────────────────────────────────────────────────────────────
+
+@Composable
+private fun MissionCard(
+    goalName: String,
+    onResumeMission: () -> Unit,
+    onOpenMissions: () -> Unit
+) {
+    DashboardCard {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
+        ) {
+            Text(
+                text = "⚑  Misión actual",
+                color = Gold,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = 1.5.sp
+            )
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Gold.copy(alpha = 0.14f))
+                    .border(1.dp, Gold.copy(alpha = 0.35f), RoundedCornerShape(20.dp))
+                    .padding(horizontal = 10.dp, vertical = 3.dp)
+            ) {
+                Text(
+                    text = "ACTIVA",
+                    color = Gold,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.2.sp
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(6.dp))
 
         Text(
-            text = "El doomscroll ha dispersado tu energía entre varios frentes.",
-            color = TextSecondary,
-            style = MaterialTheme.typography.bodyMedium
+            text = goalName,
+            color = TextPrimary,
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 0.3.sp
         )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        socialApps.forEachIndexed { index, app ->
-            SocialUsageRow(app = app )
-
-            if (index != socialApps.lastIndex) {
-                Spacer(modifier = Modifier.height(10.dp))
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Peligro total",
+            text = "Completa tu práctica diaria para avanzar en tu misión.",
             color = TextSecondary,
-            style = MaterialTheme.typography.labelLarge
+            fontSize = 14.sp,
+            fontStyle = FontStyle.Italic,
+            modifier = Modifier.padding(top = 3.dp, bottom = 14.dp)
         )
-
-        Spacer(modifier = Modifier.height(8.dp))
 
         LinearProgressIndicator(
-            progress = { dangerProgress },
+            progress = { 0.62f },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(10.dp)
-                .clip(RoundedCornerShape(999.dp)),
-            color = Danger,
+                .height(4.dp)
+                .clip(RoundedCornerShape(2.dp)),
+            color = Gold,
             trackColor = PanelSecondary
         )
+        Text(
+            text = "62% completado hoy",
+            color = TextSecondary,
+            fontSize = 11.sp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 4.dp, bottom = 14.dp),
+            textAlign = TextAlign.End
+        )
+
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Button(
+                onClick = onResumeMission,
+                modifier = Modifier.weight(2f),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Gold,
+                    contentColor = BgColor
+                )
+            ) {
+                Text("Continuar misión", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+            }
+            OutlinedButton(
+                onClick = onOpenMissions,
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(10.dp),
+                border = BorderStroke(1.dp, GoldSoft.copy(alpha = 0.5f)),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = TextSecondary)
+            ) {
+                Text("Cambiar", fontSize = 13.sp)
+            }
+        }
     }
 }
 
+// ─── Suggested Resource Card ──────────────────────────────────────────────────
+
 @Composable
-private fun PermissionCard(
-    onGrantPermission: () -> Unit
+private fun SuggestedResourceCard(
+    resourceTitle: String,
+    resourceType: String,
+    resourceSource: String
 ) {
-    FantasyCard(
-        title = "Permiso requerido",
-        titleColor = Danger
-    ) {
+    DashboardCard {
         Text(
-            text = "ScrollSlayer necesita acceso al uso de apps para detectar cuánto tiempo pasas en redes sociales.",
-            color = TextPrimary,
-            style = MaterialTheme.typography.bodyMedium
+            text = "✦  Acción sugerida",
+            color = AccentBlue,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.SemiBold,
+            letterSpacing = 1.5.sp
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Actívalo en la configuración del sistema para empezar a rastrear a los enemigos del día.",
-            color = TextSecondary,
-            style = MaterialTheme.typography.bodyMedium
+            text = resourceTitle,
+            color = TextPrimary,
+            fontSize = 17.sp,
+            fontWeight = FontWeight.SemiBold
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = onGrantPermission,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Danger,
-                contentColor = Color.White
-            ),
-            shape = RoundedCornerShape(16.dp)
-        ) {
-            Text(text = "Conceder acceso")
-        }
-    }
-}
-@Composable
-private fun SocialUsageRow(
-    app: SocialUsage
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(PanelSecondary.copy(alpha = 0.55f))
-            .padding(horizontal = 14.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .size(38.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(Danger.copy(alpha = 0.14f)),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(text = app.icon)
-        }
-
-        Spacer(modifier = Modifier.width(12.dp))
-
-        Column(
-            modifier = Modifier.weight(1f)
-        ) {
-            Text(
-                text = app.appName,
-                color = TextPrimary,
-                style = MaterialTheme.typography.titleMedium
-            )
-            Text(
-                text = "Tiempo consumido hoy",
-                color = TextSecondary,
-                style = MaterialTheme.typography.bodySmall
-            )
-        }
-
-        Text(
-            text = "${app.minutes} min",
-            color = Gold,
-            style = MaterialTheme.typography.titleMedium
-        )
-    }
-}
-
-@Composable
-private fun MissionActionCard(
-    goalName: String,
-    resourceTitle: String,
-    onResumeMission: () -> Unit,
-    onOpenMissions: () -> Unit
-) {
-    FantasyCard(
-        title = "Misión activa",
-        titleColor = Gold
-    ) {
         Row(
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
+        ) {
+            ResourceTypeBadge(type = resourceType)
+            Text(text = resourceSource, color = TextSecondary, fontSize = 11.sp)
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Button(
+                onClick = { },
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = AccentBlue.copy(alpha = 0.3f),
+                    contentColor = AccentBlue
+                )
+            ) {
+                Text("Abrir recurso", fontSize = 13.sp)
+            }
+            OutlinedButton(
+                onClick = { },
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(10.dp),
+                border = BorderStroke(1.dp, GoldSoft.copy(alpha = 0.4f)),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = TextSecondary)
+            ) {
+                Text("Saltar", fontSize = 13.sp)
+            }
+        }
+    }
+}
+
+@Composable
+private fun ResourceTypeBadge(type: String) {
+    val (bg, border, text) = when (type.lowercase()) {
+        "podcast"               -> Triple(AccentBlue.copy(alpha = 0.18f), AccentBlue.copy(alpha = 0.35f), AccentBlue)
+        "video"                 -> Triple(Danger.copy(alpha = 0.18f),     Danger.copy(alpha = 0.35f),     Danger)
+        "artículo", "articulo"  -> Triple(Success.copy(alpha = 0.18f),    Success.copy(alpha = 0.35f),    Success)
+        else                    -> Triple(GoldSoft.copy(alpha = 0.18f),   GoldSoft.copy(alpha = 0.35f),   Gold)
+    }
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(20.dp))
+            .background(bg)
+            .border(1.dp, border, RoundedCornerShape(20.dp))
+            .padding(horizontal = 9.dp, vertical = 3.dp)
+    ) {
+        Text(text = type, color = text, fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
+    }
+}
+
+// ─── Companion Card ───────────────────────────────────────────────────────────
+
+@Composable
+private fun CompanionCard() {
+    DashboardCard {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             Box(
                 modifier = Modifier
-                    .size(44.dp)
+                    .size(54.dp)
                     .clip(RoundedCornerShape(14.dp))
-                    .background(Success.copy(alpha = 0.18f))
-                    .border(
-                        width = 1.dp,
-                        color = Success.copy(alpha = 0.5f),
-                        shape = RoundedCornerShape(14.dp)
-                    ),
+                    .background(PanelSecondary)
+                    .border(1.dp, GoldSoft.copy(alpha = 0.4f), RoundedCornerShape(14.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "📜")
+                Text(text = "🧙", fontSize = 26.sp)
             }
 
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = goalName,
-                    color = TextPrimary,
-                    style = MaterialTheme.typography.titleLarge
+                    text = "El Archivista Mago",
+                    color = Gold,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    letterSpacing = 1.sp
                 )
+                Spacer(modifier = Modifier.height(3.dp))
                 Text(
-                    text = "Tu meta sigue en pie. Aún puedes retomar el camino.",
+                    text = "\"Incluso diez minutos enfocados reconfiguran el campo de batalla.\"",
                     color = TextSecondary,
-                    style = MaterialTheme.typography.bodyMedium
+                    fontSize = 13.sp,
+                    fontStyle = FontStyle.Italic,
+                    lineHeight = 18.sp
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(18.dp))
-
-        Box(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(18.dp))
-                .background(PanelSecondary.copy(alpha = 0.7f))
-                .padding(14.dp)
+                .padding(top = 10.dp),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
-                Text(
-                    text = "Siguiente acción",
-                    color = AccentBlue,
-                    style = MaterialTheme.typography.labelLarge
-                )
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                Text(
-                    text = resourceTitle,
-                    color = TextPrimary,
-                    style = MaterialTheme.typography.titleMedium
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = "Usa unos minutos recuperados para avanzar en tu misión.",
-                    color = TextSecondary,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-
-            Button(
-                onClick = onResumeMission,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = AccentBlue,
-                    contentColor = Color.White
-                ),
-                shape = RoundedCornerShape(16.dp)
+            TextButton(
+                onClick = { },
+                colors = ButtonDefaults.textButtonColors(contentColor = TextSecondary)
             ) {
-                Text(text = "Retomar misión")
+                Text("Ignorar", fontSize = 12.sp)
             }
-            Button(
-                onClick = onOpenMissions,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = AccentBlue,
-                    contentColor = Color.White
-                ),
-                shape = RoundedCornerShape(16.dp)) {
-                Text("Ver misiones")
+            Spacer(modifier = Modifier.width(4.dp))
+            OutlinedButton(
+                onClick = { },
+                shape = RoundedCornerShape(10.dp),
+                border = BorderStroke(1.dp, GoldSoft.copy(alpha = 0.4f)),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = TextSecondary),
+                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
+            ) {
+                Text("Cambiar compañero", fontSize = 12.sp)
             }
         }
     }
 }
 
+// ─── Permission Card ──────────────────────────────────────────────────────────
+
 @Composable
-private fun StatsSection(
-    savedResources: Int,
-    recoverableMinutes: Int,
-    notificationsEnabled: Boolean
-) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
+private fun PermissionCard(onGrantPermission: () -> Unit) {
+    DashboardCard {
         Text(
-            text = "Estado del reino",
-            color = Gold,
-            style = MaterialTheme.typography.titleMedium
+            text = "⚠  Permiso requerido",
+            color = Danger,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.SemiBold,
+            letterSpacing = 1.5.sp
         )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "ScrollSlayer necesita acceso al uso de apps para detectar a los enemigos del día.",
+            color = TextPrimary,
+            fontSize = 14.sp,
+            lineHeight = 20.sp
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = "Actívalo en la configuración del sistema para empezar.",
+            color = TextSecondary,
+            fontSize = 13.sp,
+            fontStyle = FontStyle.Italic
+        )
+        Spacer(modifier = Modifier.height(14.dp))
+        Button(
+            onClick = onGrantPermission,
+            shape = RoundedCornerShape(10.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Danger,
+                contentColor = Color.White
+            )
         ) {
-            StatCard(
-                modifier = Modifier.weight(1f),
-                value = savedResources.toString(),
-                label = "Recursos"
-            )
-
-            StatCard(
-                modifier = Modifier.weight(1f),
-                value = "${recoverableMinutes}m",
-                label = "Recuperables"
-            )
-
-            StatCard(
-                modifier = Modifier.weight(1f),
-                value = if (notificationsEnabled) "ON" else "OFF",
-                label = "Alertas"
-            )
+            Text("Conceder acceso")
         }
     }
 }
 
+// ─── Base Card ────────────────────────────────────────────────────────────────
+
 @Composable
-private fun StatCard(
-    modifier: Modifier = Modifier,
-    value: String,
-    label: String
-) {
+private fun DashboardCard(content: @Composable ColumnScope.() -> Unit) {
     Card(
-        modifier = modifier,
         colors = CardDefaults.cardColors(containerColor = PanelColor),
-        shape = RoundedCornerShape(18.dp),
-        border = BorderStroke(1.dp, GoldSoft.copy(alpha = 0.65f))
+        shape = RoundedCornerShape(20.dp),
+        border = BorderStroke(1.dp, GoldSoft.copy(alpha = 0.6f))
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 18.dp, horizontal = 12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = value,
-                color = TextPrimary,
-                style = MaterialTheme.typography.titleLarge
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Text(
-                text = label,
-                color = TextSecondary,
-                style = MaterialTheme.typography.labelMedium
-            )
-        }
-    }
-}
-
-@Composable
-private fun FantasyCard(
-    title: String,
-    titleColor: Color,
-    content: @Composable ColumnScope.() -> Unit
-) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = PanelColor),
-        shape = RoundedCornerShape(24.dp),
-        border = BorderStroke(
-            width = 1.dp,
-            color = GoldSoft.copy(alpha = 0.75f)
+                .padding(18.dp),
+            content = content
         )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(18.dp)
-        ) {
-            Text(
-                text = title,
-                color = titleColor,
-                style = MaterialTheme.typography.titleMedium
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-            content()
-        }
     }
 }
