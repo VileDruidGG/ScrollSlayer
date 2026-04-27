@@ -372,6 +372,7 @@ private fun EmptyResourcesState() {
 
 // ─── Add Resource Card ────────────────────────────────────────────────────────
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AddResourceCard(
     title: String,
