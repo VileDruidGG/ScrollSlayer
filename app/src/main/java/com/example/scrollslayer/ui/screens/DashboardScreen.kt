@@ -31,6 +31,7 @@ import android.provider.Settings
 @Composable
 fun DashboardScreen(
     viewModel: DashboardViewModel,
+    contentPadding: PaddingValues = PaddingValues(),
     onOpenMissions: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -47,53 +48,50 @@ fun DashboardScreen(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    Scaffold(containerColor = BgColor) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(BgColor)
-                .padding(innerPadding)
-                .statusBarsPadding()
-                .navigationBarsPadding()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 18.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            DashboardHeader()
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(BgColor)
+            .padding(contentPadding)
+            .statusBarsPadding()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 18.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        DashboardHeader()
 
-            if (!uiState.hasUsagePermission) {
-                PermissionCard(
-                    onGrantPermission = {
-                        context.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
-                    }
-                )
-            } else {
-                EnemiesCard(
-                    socialApps = uiState.socialApps,
-                    totalMinutes = uiState.totalMinutes
-                )
-            }
-
-            MissionCard(
-                goalName = uiState.goalName,
-                onResumeMission = { /* TODO */ },
-                onOpenMissions = onOpenMissions
+        if (!uiState.hasUsagePermission) {
+            PermissionCard(
+                onGrantPermission = {
+                    context.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+                }
             )
-
-            SuggestedResourceCard(
-                resourceTitle = "BBC French Listening",
-                resourceType = "Podcast",
-                resourceSource = "bbc.co.uk · 12 min"
+        } else {
+            EnemiesCard(
+                socialApps = uiState.socialApps,
+                totalMinutes = uiState.totalMinutes
             )
-
-            CompanionCard()
-
-            Spacer(modifier = Modifier.height(8.dp))
         }
+
+        MissionCard(
+            goalName = uiState.goalName,
+            onResumeMission = { /* TODO */ },
+            onOpenMissions = onOpenMissions
+        )
+
+        SuggestedResourceCard(
+            resourceTitle = "BBC French Listening",
+            resourceType = "Podcast",
+            resourceSource = "bbc.co.uk · 12 min"
+        )
+
+        CompanionCard()
+
+        Spacer(modifier = Modifier.height(8.dp))
     }
 }
 
-// ─── Header ───────────────────────────────────────────────────────────────────
+// ─── Header ────────────────────────────────────────────────────────────────────────────────
 
 @Composable
 private fun DashboardHeader() {
@@ -113,7 +111,7 @@ private fun DashboardHeader() {
                 letterSpacing = 0.5.sp
             )
             Text(
-                text = "\"Tu tiempo de hoy tiene consecuencias.\"",
+                text = "\" Tu tiempo de hoy tiene consecuencias.\"",
                 color = TextSecondary,
                 fontSize = 13.sp,
                 fontStyle = FontStyle.Italic
@@ -133,7 +131,7 @@ private fun DashboardHeader() {
     }
 }
 
-// ─── Enemies Card ─────────────────────────────────────────────────────────────
+// ─── Enemies Card ───────────────────────────────────────────────────────────────────
 
 @Composable
 private fun EnemiesCard(
@@ -142,7 +140,7 @@ private fun EnemiesCard(
 ) {
     DashboardCard {
         Text(
-            text = "⚔  Actividad enemiga hoy",
+            text = "⚔  Actividad enemiga hoy",
             color = Danger,
             fontSize = 11.sp,
             fontWeight = FontWeight.SemiBold,
@@ -261,7 +259,7 @@ private fun EnemyRow(app: SocialUsage) {
     }
 }
 
-// ─── Mission Card ─────────────────────────────────────────────────────────────
+// ─── Mission Card ────────────────────────────────────────────────────────────────────
 
 @Composable
 private fun MissionCard(
@@ -276,7 +274,7 @@ private fun MissionCard(
             verticalAlignment = Alignment.Top
         ) {
             Text(
-                text = "⚑  Misión actual",
+                text = "⚑  Misión actual",
                 color = Gold,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -361,7 +359,7 @@ private fun MissionCard(
     }
 }
 
-// ─── Suggested Resource Card ──────────────────────────────────────────────────
+// ─── Suggested Resource Card ──────────────────────────────────────────────────────────────────
 
 @Composable
 private fun SuggestedResourceCard(
@@ -371,7 +369,7 @@ private fun SuggestedResourceCard(
 ) {
     DashboardCard {
         Text(
-            text = "✦  Acción sugerida",
+            text = "✦  Acción sugerida",
             color = AccentBlue,
             fontSize = 11.sp,
             fontWeight = FontWeight.SemiBold,
@@ -440,7 +438,7 @@ private fun ResourceTypeBadge(type: String) {
     }
 }
 
-// ─── Companion Card ───────────────────────────────────────────────────────────
+// ─── Companion Card ─────────────────────────────────────────────────────────────────────────
 
 @Composable
 private fun CompanionCard() {
@@ -506,13 +504,13 @@ private fun CompanionCard() {
     }
 }
 
-// ─── Permission Card ──────────────────────────────────────────────────────────
+// ─── Permission Card ─────────────────────────────────────────────────────────────────────
 
 @Composable
 private fun PermissionCard(onGrantPermission: () -> Unit) {
     DashboardCard {
         Text(
-            text = "⚠  Permiso requerido",
+            text = "⚠  Permiso requerido",
             color = Danger,
             fontSize = 11.sp,
             fontWeight = FontWeight.SemiBold,
@@ -546,7 +544,7 @@ private fun PermissionCard(onGrantPermission: () -> Unit) {
     }
 }
 
-// ─── Base Card ────────────────────────────────────────────────────────────────
+// ─── Base Card ────────────────────────────────────────────────────────────────────────────────
 
 @Composable
 private fun DashboardCard(content: @Composable ColumnScope.() -> Unit) {

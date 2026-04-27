@@ -24,27 +24,26 @@ import com.example.scrollslayer.viewmodel.MissionViewModel
 
 @Composable
 fun MissionsScreen(
+    contentPadding: PaddingValues = PaddingValues(),
     onMissionSelected: (MissionEntity) -> Unit,
     viewModel: MissionViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    Scaffold(containerColor = BgColor) { innerPadding ->
-        MissionsContent(
-            paddingValues = innerPadding,
-            missions = uiState.missions,
-            activeMission = uiState.activeMission,
-            onCreateMission = viewModel::createMission,
-            onSetActiveMission = viewModel::setActiveMission,
-            onDeleteMission = viewModel::deleteMission,
-            onMissionSelected = onMissionSelected
-        )
-    }
+    MissionsContent(
+        contentPadding = contentPadding,
+        missions = uiState.missions,
+        activeMission = uiState.activeMission,
+        onCreateMission = viewModel::createMission,
+        onSetActiveMission = viewModel::setActiveMission,
+        onDeleteMission = viewModel::deleteMission,
+        onMissionSelected = onMissionSelected
+    )
 }
 
 @Composable
 private fun MissionsContent(
-    paddingValues: PaddingValues,
+    contentPadding: PaddingValues,
     missions: List<MissionEntity>,
     activeMission: MissionEntity?,
     onCreateMission: (String, String, Boolean) -> Unit,
@@ -62,16 +61,13 @@ private fun MissionsContent(
         modifier = Modifier
             .fillMaxSize()
             .background(BgColor)
-            .padding(paddingValues)
-            .statusBarsPadding()
-            .navigationBarsPadding(),
+            .padding(contentPadding)
+            .statusBarsPadding(),
         verticalArrangement = Arrangement.spacedBy(12.dp),
         contentPadding = PaddingValues(horizontal = 18.dp, vertical = 16.dp)
     ) {
-        // Board header
         item { BoardHeader(activeMission = activeMission) }
 
-        // Section label
         item {
             Text(
                 text = "CONTRATOS ACTIVOS",
@@ -96,7 +92,6 @@ private fun MissionsContent(
             }
         }
 
-        // Divider ornament
         item {
             Row(
                 modifier = Modifier
@@ -111,7 +106,6 @@ private fun MissionsContent(
             }
         }
 
-        // Create mission form
         item {
             CreateMissionCard(
                 title = title,
@@ -135,7 +129,7 @@ private fun MissionsContent(
     }
 }
 
-// ─── Board Header ─────────────────────────────────────────────────────────────
+// ─── Board Header ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
 private fun BoardHeader(activeMission: MissionEntity?) {
@@ -179,7 +173,7 @@ private fun BoardHeader(activeMission: MissionEntity?) {
     }
 }
 
-// ─── Mission Board Card ───────────────────────────────────────────────────────
+// ─── Mission Board Card ────────────────────────────────────────────────────────────────────
 
 @Composable
 private fun MissionBoardCard(
@@ -280,7 +274,7 @@ private fun MissionStatusBadge(isActive: Boolean) {
     }
 }
 
-// ─── Empty State ──────────────────────────────────────────────────────────────
+// ─── Empty State ──────────────────────────────────────────────────────────────────────────────
 
 @Composable
 private fun EmptyMissionsState() {
@@ -310,7 +304,7 @@ private fun EmptyMissionsState() {
     }
 }
 
-// ─── Create Mission Card ──────────────────────────────────────────────────────
+// ─── Create Mission Card ────────────────────────────────────────────────────────────────────
 
 @Composable
 private fun CreateMissionCard(
@@ -345,7 +339,7 @@ private fun CreateMissionCard(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "✦  Crear nueva misión",
+                text = "✦  Crear nueva misión",
                 color = Gold,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.SemiBold,

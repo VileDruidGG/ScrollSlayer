@@ -1,7 +1,6 @@
 package com.example.scrollslayer
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -26,8 +25,8 @@ sealed class AppScreen {
     data class MissionDetail(val mission: MissionEntity) : AppScreen()
 }
 
-// Screens that show the bottom navigation bar
-private fun AppScreen.isRootScreen() = this is AppScreen.Dashboard || this is AppScreen.Missions
+private fun AppScreen.isRootScreen() =
+    this is AppScreen.Dashboard || this is AppScreen.Missions
 
 @Composable
 fun ScrollSlayerApp() {
@@ -45,31 +44,27 @@ fun ScrollSlayerApp() {
             }
         }
     ) { innerPadding ->
-        Surface(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            when (val screen = currentScreen) {
-                AppScreen.Dashboard -> {
-                    DashboardScreen(
-                        viewModel = dashboardViewModel,
-                        onOpenMissions = { currentScreen = AppScreen.Missions }
-                    )
-                }
-                AppScreen.Missions -> {
-                    MissionsScreen(
-                        onMissionSelected = { mission ->
-                            currentScreen = AppScreen.MissionDetail(mission)
-                        }
-                    )
-                }
-                is AppScreen.MissionDetail -> {
-                    MissionDetailScreen(
-                        mission = screen.mission,
-                        onBack = { currentScreen = AppScreen.Missions }
-                    )
-                }
+        when (val screen = currentScreen) {
+            AppScreen.Dashboard -> {
+                DashboardScreen(
+                    viewModel = dashboardViewModel,
+                    contentPadding = innerPadding,
+                    onOpenMissions = { currentScreen = AppScreen.Missions }
+                )
+            }
+            AppScreen.Missions -> {
+                MissionsScreen(
+                    contentPadding = innerPadding,
+                    onMissionSelected = { mission ->
+                        currentScreen = AppScreen.MissionDetail(mission)
+                    }
+                )
+            }
+            is AppScreen.MissionDetail -> {
+                MissionDetailScreen(
+                    mission = screen.mission,
+                    onBack = { currentScreen = AppScreen.Missions }
+                )
             }
         }
     }
@@ -87,7 +82,7 @@ private fun ScrollSlayerBottomNav(
         NavigationBarItem(
             selected = currentScreen is AppScreen.Dashboard,
             onClick = { onNavigate(AppScreen.Dashboard) },
-            icon = { Text("⚔", fontSize = 20.sp) },
+            icon = { Text("\u2694", fontSize = 20.sp) },
             label = {
                 Text(
                     text = "Dashboard",
@@ -107,7 +102,7 @@ private fun ScrollSlayerBottomNav(
         NavigationBarItem(
             selected = currentScreen is AppScreen.Missions,
             onClick = { onNavigate(AppScreen.Missions) },
-            icon = { Text("⚑", fontSize = 20.sp) },
+            icon = { Text("\u2691", fontSize = 20.sp) },
             label = {
                 Text(
                     text = "Misiones",
